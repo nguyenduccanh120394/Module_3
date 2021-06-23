@@ -307,10 +307,11 @@ join demo2006.orderdetail od
 join demo2006.product p
 on c.id = o.customerId 
 and o.id = od.orderId and p.id = od.productId
-group by o.id;
+group by o.customerId
+order by TriGia desc
+limit 10;
 select DoanhSo.id , sum(DoanhSo.TriGia) as DoanhSoByCus , DoanhSo.name , sum(DoanhSo.solanmuahang) as SoLanMua
 from DoanhSo
 where DoanhSo.solanmuahang =(select max(DoanhSo.solanmuahang)  from Doanhso)
-group by DoanhSo.name 
-order by DoanhSoByCus desc
-limit 10;
+group by DoanhSo.name ;
+
