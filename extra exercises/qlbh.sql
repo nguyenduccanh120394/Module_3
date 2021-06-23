@@ -4,30 +4,40 @@ use demo2006;
 
 -- 6. In ra các số hóa đơn, trị giá hóa đơn bán ra trong ngày 19/6/2006 và ngày 20/6/2006.
 select o.id,o.time,sum(p.price*od.quantity)as totall
-from (demo2006.order o,demo2006.product p) join demo2006.orderdetail od 
-on o.id =od.orderId and p.id= od.productId 
-where o.time between '2006-06-19' and '2006-06-20'
+from (demo2006.order o,demo2006.product p) 
+join demo2006.orderdetail od 
+on o.id =od.orderId 
+and p.id= od.productId 
+where o.time between '2006-06-19' 
+and '2006-06-20'
 group by o.id;
 
 -- 7. In ra các số hóa đơn, trị giá hóa đơn trong tháng 6/2007, sắp xếp theo ngày (tăng dần) và trị giá của hóa đơn (giảm dần).
 select o.id,o.time,sum(p.price*od.quantity)as total
-from (demo2006.order o,demo2006.product p) join demo2006.orderdetail od 
-on o.id =od.orderId and p.id= od.productId 
+from (demo2006.order o,demo2006.product p) 
+join demo2006.orderdetail od 
+on o.id =od.orderId 
+and p.id= od.productId 
 where o.time like '2006-06-%'
 group by o.id
 order by o.time asc , total desc;
 
 -- 8. In ra danh sách các khách hàng (MAKH, HOTEN) đã mua hàng trong ngày 20/06/2007.
 select c.id,c.name,o.time
-from demo2006.customer c join demo2006.order o on c.id =o.customerId
+from demo2006.customer c 
+join demo2006.order o on c.id =o.customerId
 where o.time ='2006-06-20'
 group by c.id;
 
 -- 10. In ra danh sách các sản phẩm (MASP,TENSP) được khách hàng có tên “Nguyen Van A” mua trong tháng 10/2006.
 select c.name,p.id,p.name,o.time
-from demo2006.customer c inner join demo2006.order o inner join demo2006.orderdetail od inner join demo2006.product p on 
-c.id = o.customerId and o.id = od.orderId and p.id = od.productId
-where c.id = o.customerId and o.id = od.orderId and p.id = od.productId and c.name ='Thao Pham' and o.time like '2006-10-%';
+from demo2006.customer c 
+inner join demo2006.order o 
+inner join demo2006.orderdetail od 
+inner join demo2006.product p on 
+c.id = o.customerId and o.id = od.orderId 
+and p.id = od.productId
+where c.id = o.customerId and o.id = od.orderId and p.id = od.productId and c.name ='Nguyen Van A' and o.time like '2006-10-%';
 
 -- 11. Tìm các số hóa đơn đã mua sản phẩm “Máy giặt” hoặc “Tủ lạnh”.
 select o.id as soHD,p.name as SpMua
@@ -220,7 +230,6 @@ on p.id = od.productId and o.id =od.orderId
 where o.time like '2006-10-%'
 group by p.id;
 
-
 -- 37. Tính doanh thu bán hàng của từng tháng trong năm 2006.
 select o.id , sum(p.price*od.quantity) as DoanhThu, month(o.time) as Month
 from demo2006.product p 
@@ -240,22 +249,29 @@ group by o.id
 having count(distinct p.id)>=4;
 
 -- 39. Tìm hóa đơn có mua 3 sản phẩm có giá <300 (3 sản phẩm khác nhau).
+create view SPGiaDuoi300 as
 select o.id , p.price
 from demo2006.product p 
 inner join demo2006.orderdetail od 
 inner join demo2006.order o 
 on p.id = od.productId and o.id =od.orderId
-group by o.id
-having count(distinct p.id) = 3 and (select price from product where price<300);
+where p.price<300;
 
+select SPGiaDuoi300.id as SoHD ,count(SPGiaDuoi300.id) as SoSanPhamGiaDuoi300
+from SPGiaDuoi300
+group by SPGiaDuoi300.id
+having SoSanPhamGiaDuoi300>=2;
 
 -- 40. Tìm khách hàng (MAKH, HOTEN) có số lần mua hàng nhiều nhất.
+create view dskh as
 select c.id,c.name, count(od.orderid)as solanmuahang
 from demo2006.customer c join demo2006.order o join demo2006.orderdetail od join demo2006.product p
 on c.id = o.customerId and o.id = od.orderId and p.id = od.productId
-group by c.id
-order by solanmuahang desc
-limit 1;
+group by c.id;
+select dskh.name ,dskh.solanmuahang
+from dskh
+where dskh.solanmuahang =(select max(dskh.solanmuahang)from dskh);
+
 
 -- 41. Tháng mấy trong năm 2006, doanh số bán hàng cao nhất?
 create view DoanhSoThang as
